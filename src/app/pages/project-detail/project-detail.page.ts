@@ -111,7 +111,7 @@ export class ProjectDetailPage {
     this.testingLogin = true;
     this.loginTestResponse = '';
     try {
-      this.loginTestResponse = await this.apiService.testLogin(this.auth);
+      this.loginTestResponse = await this.apiService.testLogin(this.auth, this.project.baseUrl);
     } catch (e: any) {
       this.loginTestResponse = 'Erro: ' + (e.message || 'Falha na requisição');
     } finally {

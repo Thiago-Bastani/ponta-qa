@@ -21,7 +21,7 @@ export class ApiService {
     if (project.auth.type === 'bearer' && project.auth.bearerToken) {
       authToken = project.auth.bearerToken;
     } else if (project.auth.type === 'login') {
-      authToken = await this.getToken(project.auth);
+      authToken = await this.getToken(project.auth, project.baseUrl);
     }
 
     const baseUrl = project.baseUrl.replace(/\/$/, '');
@@ -81,33 +81,38 @@ export class ApiService {
     });
   }
 
-  async getToken(auth: AuthConfig): Promise<string | null> {
+  async getToken(auth: AuthConfig, baseUrl: string): Promise<string | null> {
     if (!auth.loginUrl) return null;
+    const url = this.resolveUrl(baseUrl, auth.loginUrl);
     const body: Record<string, string> = {};
     if (auth.usernameField && auth.username) body[auth.usernameField] = auth.username;
     if (auth.passwordField && auth.password) body[auth.passwordField] = auth.password;
 
     const req = auth.loginMethod === 'GET'
-      ? this.http.get(auth.loginUrl)
-      : this.http.post(auth.loginUrl, body);
+      ? this.http.get(url)
+      : this.http.post(url, body);
 
     return new Promise(resolve => {
       req.subscribe({
-        next: (res: any) => resolve(this.extractValue(res, auth.tokenPath || '') ? String(this.extractValue(res, auth.tokenPath || '')) : null),
+        next: (res: any) => {
+          const val = this.extractValue(res, auth.tokenPath || '');
+          resolve(val ? String(val) : null);
+        },
         error: () => resolve(null),
       });
     });
   }
 
-  async testLogin(auth: AuthConfig): Promise<string> {
-    if (!auth.loginUrl) return 'URL de login não configurada.';
+  async testLogin(auth: AuthConfig, baseUrl: string): Promise<string> {
+    if (!auth.loginUrl) return 'Path de login não configurado.';
+    const url = this.resolveUrl(baseUrl, auth.loginUrl);
     const body: Record<string, string> = {};
     if (auth.usernameField && auth.username) body[auth.usernameField] = auth.username;
     if (auth.passwordField && auth.password) body[auth.passwordField] = auth.password;
 
     const req = auth.loginMethod === 'GET'
-      ? this.http.get(auth.loginUrl, { observe: 'response', responseType: 'text' })
-      : this.http.post(auth.loginUrl, body, { observe: 'response', responseType: 'text' });
+      ? this.http.get(url, { observe: 'response', responseType: 'text' })
+      : this.http.post(url, body, { observe: 'response', responseType: 'text' });
 
     return new Promise(resolve => {
       req.subscribe({
@@ -117,6 +122,13 @@ export class ApiService {
         error: (err) => resolve(`Erro ${err.status}: ${err.error || err.message}`),
       });
     });
+  }
+
+  private resolveUrl(baseUrl: string, path: string): string {
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const base = baseUrl.replace(/\/$/, '');
+    const p = path.startsWith('/') ? path : '/' + path;
+    return base + p;
   }
 
   private extractValue(obj: any, path: string): any {

@@ -96,12 +96,16 @@
         @if (auth.type === 'login') {
           <ion-list inset>
             <ion-item>
+              <ion-label position="stacked">
+                <div class="base-url-hint">
+                  <small>Base URL: <strong>{{ project.baseUrl }}</strong></small>
+                </div>
+              </ion-label>
               <ion-input
-                label="URL de login"
+                label="Path de login"
                 labelPlacement="stacked"
                 [(ngModel)]="auth.loginUrl"
-                placeholder="https://api.exemplo.com/auth/login"
-                inputmode="url"
+                placeholder="/auth/login"
               ></ion-input>
             </ion-item>
             <ion-item>
