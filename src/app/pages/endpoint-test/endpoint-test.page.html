@@ -37,9 +37,8 @@
         </ion-select>
         <ion-input
           [(ngModel)]="endpoint.path"
-          placeholder="/caminho"
+          placeholder="/caminho ou /users/{id}"
           class="path-input"
-          fill="outline"
         ></ion-input>
       </div>
       <ion-text color="medium">
@@ -60,6 +59,14 @@
           <ion-label>Body</ion-label>
         </ion-segment-button>
       }
+      <ion-segment-button value="vars">
+        <ion-label>
+          Variáveis
+          @if (detectedVars.length > 0) {
+            <ion-badge color="primary" style="margin-left:4px;font-size:10px">{{ detectedVars.length }}</ion-badge>
+          }
+        </ion-label>
+      </ion-segment-button>
     </ion-segment>
 
     <!-- Params Tab -->
@@ -68,8 +75,8 @@
         @for (item of endpoint.params; track $index; let i = $index) {
           <div class="kv-row">
             <ion-checkbox [(ngModel)]="item.enabled"></ion-checkbox>
-            <ion-input [(ngModel)]="item.key" placeholder="Chave" fill="outline"></ion-input>
-            <ion-input [(ngModel)]="item.value" placeholder="Valor" fill="outline"></ion-input>
+            <ion-input [(ngModel)]="item.key" placeholder="Chave"></ion-input>
+            <ion-input [(ngModel)]="item.value" placeholder="Valor"></ion-input>
             <ion-button fill="clear" color="danger" (click)="removePair(endpoint.params, i)">
               <ion-icon name="close-outline" slot="icon-only"></ion-icon>
             </ion-button>
@@ -128,8 +135,8 @@
           @for (item of endpoint.bodyFormData!; track $index; let i = $index) {
             <div class="kv-row">
               <ion-checkbox [(ngModel)]="item.enabled"></ion-checkbox>
-              <ion-input [(ngModel)]="item.key" placeholder="Campo" fill="outline"></ion-input>
-              <ion-input [(ngModel)]="item.value" placeholder="Valor" fill="outline"></ion-input>
+              <ion-input [(ngModel)]="item.key" placeholder="Campo"></ion-input>
+              <ion-input [(ngModel)]="item.value" placeholder="Valor"></ion-input>
               <ion-button fill="clear" color="danger" (click)="removePair(endpoint.bodyFormData!, i)">
                 <ion-icon name="close-outline" slot="icon-only"></ion-icon>
               </ion-button>
@@ -147,8 +154,8 @@
           @for (item of endpoint.bodyParams!; track $index; let i = $index) {
             <div class="kv-row">
               <ion-checkbox [(ngModel)]="item.enabled"></ion-checkbox>
-              <ion-input [(ngModel)]="item.key" placeholder="Campo" fill="outline"></ion-input>
-              <ion-input [(ngModel)]="item.value" placeholder="Valor" fill="outline"></ion-input>
+              <ion-input [(ngModel)]="item.key" placeholder="Campo"></ion-input>
+              <ion-input [(ngModel)]="item.value" placeholder="Valor"></ion-input>
               <ion-button fill="clear" color="danger" (click)="removePair(endpoint.bodyParams!, i)">
                 <ion-icon name="close-outline" slot="icon-only"></ion-icon>
               </ion-button>
@@ -160,6 +167,39 @@
           </ion-button>
         </div>
       }
+    }
+
+    <!-- Variáveis Tab -->
+    @if (activeTab === 'vars') {
+      <div class="ion-padding">
+        <div class="vars-hint">
+          <ion-icon name="information-circle-outline" color="primary"></ion-icon>
+          <ion-text color="medium">
+            <span>Use <strong>&#123;nome&#125;</strong> em qualquer campo (path, body, params, headers) para criar uma variável. Ex: <code>/users/&#123;userId&#125;</code></span>
+          </ion-text>
+        </div>
+
+        @if (detectedVars.length === 0) {
+          <div class="vars-empty">
+            <ion-text color="medium">
+              <p>Nenhuma variável detectada ainda.<br>Adicione <strong>&#123;nome&#125;</strong> no path ou nos outros campos.</p>
+            </ion-text>
+          </div>
+        } @else {
+          <ion-list inset>
+            @for (varName of detectedVars; track varName) {
+              <ion-item>
+                <ion-input
+                  [label]="'{' + varName + '}'"
+                  labelPlacement="stacked"
+                  [(ngModel)]="variables[varName]"
+                  [placeholder]="'Valor de ' + varName"
+                ></ion-input>
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </div>
     }
 
     <!-- Enviar -->

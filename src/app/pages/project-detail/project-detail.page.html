@@ -235,7 +235,8 @@
               label="Path *"
               labelPlacement="stacked"
               [(ngModel)]="editEndpoint.path"
-              placeholder="/users"
+              placeholder="/users/{id}"
+              [helperText]="'Use {nome} para criar variáveis. Ex: /users/{id}'"
             ></ion-input>
           </ion-item>
         </ion-list>

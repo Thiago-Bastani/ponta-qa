@@ -31,6 +31,7 @@ export interface Endpoint {
   bodyJson?: string;
   bodyFormData?: KeyValuePair[];
   bodyParams?: KeyValuePair[];
+  variables?: { [key: string]: string };
 }
 
 export interface Project {

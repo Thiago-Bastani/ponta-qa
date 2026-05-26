@@ -17,6 +17,7 @@ export class EndpointTestPage {
 
   activeTab = 'params';
   bodyTab = 'json';
+  variables: { [key: string]: string } = {};
 
   response: ApiResponse | null = null;
   loading = false;
@@ -48,19 +49,54 @@ export class EndpointTestPage {
     if (!this.endpoint.bodyFormData) this.endpoint.bodyFormData = [];
     if (!this.endpoint.bodyParams) this.endpoint.bodyParams = [];
     if (!this.endpoint.bodyJson) this.endpoint.bodyJson = '{}';
+    this.variables = { ...(this.endpoint.variables || {}) };
     this.response = null;
     this.showResponseHeaders = false;
-    // Sync bodyTab: se bodyType é 'none' e método aceita body, exibe JSON por padrão
     if (this.endpoint.bodyType === 'none' && this.hasBody()) {
       this.endpoint.bodyType = 'json';
     }
     this.bodyTab = this.endpoint.bodyType === 'none' ? 'json' : this.endpoint.bodyType;
   }
 
+  // Detecta todos os {var} nos campos do endpoint
+  get detectedVars(): string[] {
+    const vars = new Set<string>();
+    const scan = (str: string) => {
+      const re = /\{([^}]+)\}/g;
+      let m;
+      while ((m = re.exec(str || '')) !== null) vars.add(m[1]);
+    };
+    scan(this.endpoint.path);
+    scan(this.endpoint.bodyJson || '');
+    [...(this.endpoint.params || []), ...(this.endpoint.headers || []),
+     ...(this.endpoint.bodyFormData || []), ...(this.endpoint.bodyParams || [])]
+      .forEach(p => { scan(p.key); scan(p.value); });
+    return [...vars];
+  }
+
   get fullUrl(): string {
     const base = this.project.baseUrl.replace(/\/$/, '');
     const path = this.endpoint.path.startsWith('/') ? this.endpoint.path : '/' + this.endpoint.path;
-    return base + path;
+    return base + this.applyVars(path);
+  }
+
+  // Aplica variáveis a uma string
+  private applyVars(str: string): string {
+    return str.replace(/\{([^}]+)\}/g, (_, key) => this.variables[key] ?? `{${key}}`);
+  }
+
+  // Cria cópia do endpoint com todas as variáveis substituídas
+  private resolveEndpoint(): Endpoint {
+    const ep: Endpoint = JSON.parse(JSON.stringify(this.endpoint));
+    const r = (s: string) => this.applyVars(s);
+    ep.path = r(ep.path);
+    if (ep.bodyJson) ep.bodyJson = r(ep.bodyJson);
+    const applyList = (list: KeyValuePair[]) => list.map(p => ({ ...p, key: r(p.key), value: r(p.value) }));
+    ep.params = applyList(ep.params);
+    ep.headers = applyList(ep.headers);
+    ep.bodyFormData = applyList(ep.bodyFormData || []);
+    ep.bodyParams = applyList(ep.bodyParams || []);
+    return ep;
   }
 
   addPair(list: KeyValuePair[]) {
@@ -85,12 +121,11 @@ export class EndpointTestPage {
     this.loading = true;
     this.response = null;
     this.showResponseHeaders = false;
-    // Garante que bodyType está sincronizado com a aba exibida
     if (this.hasBody()) {
       this.endpoint.bodyType = this.bodyTab as any;
     }
     try {
-      this.response = await this.apiService.execute(this.project, this.endpoint);
+      this.response = await this.apiService.execute(this.project, this.resolveEndpoint());
       this.showResponseHeaders = true;
     } catch (e: any) {
       const toast = await this.toastCtrl.create({
@@ -108,7 +143,7 @@ export class EndpointTestPage {
   save() {
     const idx = this.project.endpoints.findIndex(e => e.id === this.endpoint.id);
     if (idx >= 0) {
-      this.project.endpoints[idx] = { ...this.endpoint };
+      this.project.endpoints[idx] = { ...this.endpoint, variables: { ...this.variables } };
       this.storage.updateProject(this.project);
       this.toast('Endpoint salvo!');
     }

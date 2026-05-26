@@ -24,6 +24,12 @@
   font-family: monospace;
   font-size: 13px;
   --min-height: 36px;
+  --border-style: solid;
+  --border-width: 1px;
+  --border-color: var(--ion-color-medium-shade);
+  --border-radius: 4px;
+  --padding-start: 8px;
+  --padding-end: 8px;
 }
 
 .full-url-preview {
@@ -54,6 +60,13 @@
     ion-input {
       flex: 1;
       min-width: 0;
+      --border-style: solid;
+      --border-width: 1px;
+      --border-color: var(--ion-color-medium-shade);
+      --border-radius: 4px;
+      --padding-start: 8px;
+      --padding-end: 8px;
+      --min-height: 36px;
     }
 
     ion-button {
@@ -67,6 +80,25 @@
 .json-editor {
   font-family: monospace;
   font-size: 13px;
+}
+
+.vars-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+
+  ion-icon { flex-shrink: 0; margin-top: 2px; }
+  code { font-family: monospace; font-size: 12px; }
+}
+
+.vars-empty {
+  text-align: center;
+  padding: 24px 0;
+  p { line-height: 1.6; margin: 0; }
 }
 
 .send-btn {
