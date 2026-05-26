@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/projects" text="Projetos"></ion-back-button>
     </ion-buttons>
-    <ion-title>{{ project.name }}</ion-title>
+    <ion-title>{{ project?.name }}</ion-title>
   </ion-toolbar>
   <ion-toolbar>
     <ion-segment [value]="activeTab" (ionChange)="segmentChanged($event)">

@@ -12,8 +12,8 @@ import { ApiService, ApiResponse } from '../../services/api.service';
   standalone: false,
 })
 export class EndpointTestPage {
-  project!: Project;
-  endpoint!: Endpoint;
+  project: Project = { id: '', name: '', description: '', baseUrl: '', auth: { type: 'none' }, endpoints: [] };
+  endpoint: Endpoint = { id: '', name: '', method: 'GET', path: '', headers: [], params: [], bodyType: 'none', bodyJson: '{}', bodyFormData: [], bodyParams: [] };
 
   activeTab = 'params';
   bodyTab = 'json';

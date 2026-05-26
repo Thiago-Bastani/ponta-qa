@@ -12,7 +12,7 @@ import { ApiService } from '../../services/api.service';
   standalone: false,
 })
 export class ProjectDetailPage {
-  project!: Project;
+  project: Project = { id: '', name: '', description: '', baseUrl: '', auth: { type: 'none' }, endpoints: [] };
   activeTab = 'endpoints';
 
   auth: AuthConfig = { type: 'none' };
