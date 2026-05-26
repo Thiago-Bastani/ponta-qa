@@ -1,6 +1,14 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>Ponta QA</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="triggerImport()" title="Importar projetos">
+        <ion-icon name="cloud-upload-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="exportAll()" title="Exportar todos">
+        <ion-icon name="cloud-download-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -35,6 +43,9 @@
           <ion-button fill="clear" (click)="duplicateProject(project, $event)">
             <ion-icon name="copy-outline" slot="icon-only"></ion-icon>
           </ion-button>
+          <ion-button fill="clear" (click)="exportProject(project, $event)">
+            <ion-icon name="cloud-download-outline" slot="icon-only"></ion-icon>
+          </ion-button>
           <ion-button fill="clear" color="danger" (click)="confirmDelete(project, $event)">
             <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
           </ion-button>
@@ -42,6 +53,8 @@
       </ion-item>
     }
   </ion-list>
+
+  <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)">
 
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="openModal()">

@@ -1,2 +1,11 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+
+:root {
+  --ion-color-primary: #ff6a00;
+  --ion-color-primary-rgb: 255, 106, 0;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #e05d00;
+  --ion-color-primary-tint: #ff791a;
+}

@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { Project } from '../../models/project.model';
 import { StorageService } from '../../services/storage.service';
 
@@ -19,10 +19,13 @@ export class ProjectsPage {
   editingProjectId = '';
   editProject = { name: '', description: '', baseUrl: '' };
 
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
   constructor(
     private storage: StorageService,
     private router: Router,
     private alertCtrl: AlertController,
+    private toastCtrl: ToastController,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -108,6 +111,66 @@ export class ProjectsPage {
       ],
     });
     await alert.present();
+  }
+
+  exportAll() {
+    this.download(this.storage.getProjects(), `ponta-qa-all-${new Date().toISOString().slice(0, 10)}.json`);
+  }
+
+  exportProject(project: Project, event: Event) {
+    event.stopPropagation();
+    const slug = project.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    this.download([project], `ponta-qa-${slug}-${new Date().toISOString().slice(0, 10)}.json`);
+  }
+
+  private download(projects: Project[], filename: string) {
+    const blob = new Blob([JSON.stringify(projects, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  triggerImport() {
+    this.fileInput.nativeElement.click();
+  }
+
+  async onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    let imported: Project[];
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      imported = Array.isArray(parsed) ? parsed : [parsed];
+      if (!imported.every(p => p.id && p.name && p.baseUrl !== undefined)) throw new Error();
+    } catch {
+      this.toast('Arquivo inválido ou corrompido.', 'danger');
+      return;
+    }
+
+    const existing = this.storage.getProjects();
+    const existingNames = new Set(existing.map(p => p.name));
+
+    for (const p of imported) {
+      p.id = Date.now().toString() + Math.random().toString(36).slice(2);
+      if (existingNames.has(p.name)) {
+        p.name = '(Novo) ' + p.name;
+      }
+      this.storage.updateProject(p);
+    }
+    this.reload();
+    this.toast(`${imported.length} projeto(s) importado(s).`);
+  }
+
+  private async toast(message: string, color: string = 'success') {
+    const t = await this.toastCtrl.create({ message, duration: 2500, position: 'bottom', color });
+    await t.present();
   }
 
   async confirmDelete(project: Project, event: Event) {
