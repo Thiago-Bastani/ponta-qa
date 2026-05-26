@@ -165,9 +165,12 @@
     <!-- Enviar -->
     <div class="ion-padding-horizontal">
       <ion-button expand="block" (click)="send()" [disabled]="loading" class="send-btn">
-        <ion-spinner name="crescent" slot="start" [hidden]="!loading"></ion-spinner>
-        <ion-icon name="send-outline" slot="start" [hidden]="loading"></ion-icon>
-        {{ loading ? 'Enviando...' : 'Enviar' }}
+        @if (loading) {
+          <ion-spinner name="crescent" slot="start"></ion-spinner>
+        } @else {
+          <ion-icon name="send-outline" slot="start"></ion-icon>
+        }
+        <span>{{ loading ? 'Enviando...' : 'Enviar' }}</span>
       </ion-button>
     </div>
 
