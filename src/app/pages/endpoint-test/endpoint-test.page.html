@@ -1,0 +1,193 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="'/projects/' + project.id" text="Voltar"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      @if (endpoint) {
+        <ion-badge [color]="methodColor(endpoint.method)" class="method-badge-sm">{{ endpoint.method }}</ion-badge>
+        {{ endpoint.name }}
+      }
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="save()">
+        <ion-icon name="save-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (endpoint && project) {
+
+    <!-- URL Display -->
+    <div class="url-bar ion-padding-horizontal">
+      <ion-text color="medium"><small>URL</small></ion-text>
+      <p class="url-display">{{ fullUrl }}</p>
+    </div>
+
+    <!-- Request Tabs -->
+    <ion-segment [value]="activeTab" (ionChange)="tabChanged($event)">
+      <ion-segment-button value="params">
+        <ion-label>Params</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="headers">
+        <ion-label>Headers</ion-label>
+      </ion-segment-button>
+      @if (hasBody()) {
+        <ion-segment-button value="body">
+          <ion-label>Body</ion-label>
+        </ion-segment-button>
+      }
+    </ion-segment>
+
+    <!-- Params Tab -->
+    @if (activeTab === 'params') {
+      <div class="kv-container ion-padding">
+        @for (item of endpoint.params; track $index; let i = $index) {
+          <div class="kv-row">
+            <ion-checkbox [(ngModel)]="item.enabled"></ion-checkbox>
+            <ion-input [(ngModel)]="item.key" placeholder="Chave" fill="outline"></ion-input>
+            <ion-input [(ngModel)]="item.value" placeholder="Valor" fill="outline"></ion-input>
+            <ion-button fill="clear" color="danger" (click)="removePair(endpoint.params, i)">
+              <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        }
+        <ion-button fill="clear" size="small" (click)="addPair(endpoint.params)">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Adicionar param
+        </ion-button>
+      </div>
+    }
+
+    <!-- Headers Tab -->
+    @if (activeTab === 'headers') {
+      <div class="kv-container ion-padding">
+        @for (item of endpoint.headers; track $index; let i = $index) {
+          <div class="kv-row">
+            <ion-checkbox [(ngModel)]="item.enabled"></ion-checkbox>
+            <ion-input [(ngModel)]="item.key" placeholder="Header" fill="outline"></ion-input>
+            <ion-input [(ngModel)]="item.value" placeholder="Valor" fill="outline"></ion-input>
+            <ion-button fill="clear" color="danger" (click)="removePair(endpoint.headers, i)">
+              <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        }
+        <ion-button fill="clear" size="small" (click)="addPair(endpoint.headers)">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Adicionar header
+        </ion-button>
+      </div>
+    }
+
+    <!-- Body Tab -->
+    @if (activeTab === 'body') {
+      <ion-segment [value]="bodyTab" (ionChange)="bodyTabChanged($event)" class="body-segment">
+        <ion-segment-button value="json">JSON</ion-segment-button>
+        <ion-segment-button value="form-data">Form-Data</ion-segment-button>
+        <ion-segment-button value="params">URL Params</ion-segment-button>
+      </ion-segment>
+
+      @if (bodyTab === 'json') {
+        <div class="ion-padding">
+          <ion-textarea
+            [(ngModel)]="endpoint.bodyJson"
+            placeholder="{}"
+            [autoGrow]="true"
+            rows="8"
+            class="json-editor"
+            fill="outline"
+          ></ion-textarea>
+        </div>
+      }
+
+      @if (bodyTab === 'form-data') {
+        <div class="kv-container ion-padding">
+          @for (item of endpoint.bodyFormData!; track $index; let i = $index) {
+            <div class="kv-row">
+              <ion-checkbox [(ngModel)]="item.enabled"></ion-checkbox>
+              <ion-input [(ngModel)]="item.key" placeholder="Campo" fill="outline"></ion-input>
+              <ion-input [(ngModel)]="item.value" placeholder="Valor" fill="outline"></ion-input>
+              <ion-button fill="clear" color="danger" (click)="removePair(endpoint.bodyFormData!, i)">
+                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          }
+          <ion-button fill="clear" size="small" (click)="addPair(endpoint.bodyFormData!)">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Adicionar campo
+          </ion-button>
+        </div>
+      }
+
+      @if (bodyTab === 'params') {
+        <div class="kv-container ion-padding">
+          @for (item of endpoint.bodyParams!; track $index; let i = $index) {
+            <div class="kv-row">
+              <ion-checkbox [(ngModel)]="item.enabled"></ion-checkbox>
+              <ion-input [(ngModel)]="item.key" placeholder="Campo" fill="outline"></ion-input>
+              <ion-input [(ngModel)]="item.value" placeholder="Valor" fill="outline"></ion-input>
+              <ion-button fill="clear" color="danger" (click)="removePair(endpoint.bodyParams!, i)">
+                <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          }
+          <ion-button fill="clear" size="small" (click)="addPair(endpoint.bodyParams!)">
+            <ion-icon name="add-outline" slot="start"></ion-icon>
+            Adicionar campo
+          </ion-button>
+        </div>
+      }
+    }
+
+    <!-- Divider -->
+    <div class="ion-padding-horizontal">
+      <ion-button expand="block" (click)="send()" [disabled]="loading" class="send-btn">
+        @if (loading) {
+          <ion-spinner name="crescent" slot="start"></ion-spinner>
+          Enviando...
+        } @else {
+          <ion-icon name="send-outline" slot="start"></ion-icon>
+          Enviar
+        }
+      </ion-button>
+    </div>
+
+    <!-- Response Section -->
+    @if (response) {
+      <div class="response-section ion-padding">
+        <div class="response-status-row">
+          <ion-badge [color]="statusColor" class="status-badge">
+            {{ response.status }} {{ response.statusText }}
+          </ion-badge>
+          <ion-text color="medium">
+            <small>{{ response.duration }} ms</small>
+          </ion-text>
+        </div>
+
+        <!-- Response Headers Toggle -->
+        <ion-item button (click)="showResponseHeaders = !showResponseHeaders" lines="none" class="headers-toggle">
+          <ion-icon [name]="showResponseHeaders ? 'chevron-down-outline' : 'chevron-forward-outline'" slot="start"></ion-icon>
+          <ion-label>Headers da resposta ({{ responseHeadersList.length }})</ion-label>
+        </ion-item>
+
+        @if (showResponseHeaders) {
+          <div class="response-headers">
+            @for (h of responseHeadersList; track h.key) {
+              <div class="header-row">
+                <span class="header-key">{{ h.key }}</span>
+                <span class="header-value">{{ h.value }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Response Body -->
+        <ion-text color="medium"><small>Body</small></ion-text>
+        <pre class="response-body">{{ formattedBody }}</pre>
+      </div>
+    }
+
+  }
+</ion-content>

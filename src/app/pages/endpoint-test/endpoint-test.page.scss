@@ -1,0 +1,134 @@
+.url-bar {
+  padding-top: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+
+  small {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.url-display {
+  font-family: monospace;
+  font-size: 13px;
+  word-break: break-all;
+  margin: 4px 0 0 0;
+  color: var(--ion-color-dark);
+}
+
+.method-badge-sm {
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-inline-end: 6px;
+}
+
+.kv-container {
+  .kv-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+
+    ion-checkbox {
+      flex-shrink: 0;
+    }
+
+    ion-input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    ion-button {
+      flex-shrink: 0;
+      --padding-start: 4px;
+      --padding-end: 4px;
+    }
+  }
+}
+
+.json-editor {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.send-btn {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.body-segment {
+  margin: 4px 0;
+}
+
+.response-section {
+  border-top: 2px solid var(--ion-color-light-shade);
+  margin-top: 8px;
+}
+
+.response-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.status-badge {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 12px;
+}
+
+.headers-toggle {
+  --padding-start: 0;
+  --inner-padding-start: 0;
+  margin-bottom: 4px;
+}
+
+.response-headers {
+  background: var(--ion-color-light);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.header-row {
+  display: flex;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 12px;
+  font-family: monospace;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.header-key {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.header-value {
+  color: var(--ion-color-dark-tint);
+  word-break: break-all;
+}
+
+.response-body {
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: var(--ion-color-light);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 6px 0 0 0;
+  max-height: 500px;
+  overflow-y: auto;
+  line-height: 1.5;
+}

@@ -1,0 +1,240 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/projects" text="Projetos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ project.name }}</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [value]="activeTab" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="endpoints">
+        <ion-label>Endpoints</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="auth">
+        <ion-label>Autenticação</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (project) {
+
+    <!-- ==================== ENDPOINTS TAB ==================== -->
+    @if (activeTab === 'endpoints') {
+      @if (project.endpoints.length === 0) {
+        <div class="empty-state">
+          <ion-icon name="git-branch-outline"></ion-icon>
+          <ion-text color="medium">
+            <p>Nenhum endpoint ainda.<br>Toque em <strong>+</strong> para adicionar.</p>
+          </ion-text>
+        </div>
+      }
+
+      <ion-list>
+        @for (ep of project.endpoints; track ep.id) {
+          <ion-item-sliding>
+            <ion-item button detail (click)="openEndpoint(ep)">
+              <ion-badge slot="start" [color]="methodColor(ep.method)" class="method-badge">
+                {{ ep.method }}
+              </ion-badge>
+              <ion-label>
+                <h2>{{ ep.name }}</h2>
+                <p class="path">{{ ep.path }}</p>
+              </ion-label>
+            </ion-item>
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="confirmDeleteEndpoint(ep, $event)">
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        }
+      </ion-list>
+
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button (click)="openEndpointModal()">
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    }
+
+    <!-- ==================== AUTH TAB ==================== -->
+    @if (activeTab === 'auth') {
+      <div class="ion-padding">
+        <ion-list inset>
+          <ion-radio-group [(ngModel)]="auth.type">
+            <ion-item>
+              <ion-radio value="none" justify="start" labelPlacement="end">Nenhuma</ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-radio value="bearer" justify="start" labelPlacement="end">Bearer Token</ion-radio>
+            </ion-item>
+            <ion-item>
+              <ion-radio value="login" justify="start" labelPlacement="end">Login Endpoint</ion-radio>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+
+        <!-- Bearer Token -->
+        @if (auth.type === 'bearer') {
+          <ion-list inset>
+            <ion-item>
+              <ion-textarea
+                label="Token"
+                labelPlacement="stacked"
+                [(ngModel)]="auth.bearerToken"
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                [autoGrow]="true"
+                rows="3"
+              ></ion-textarea>
+            </ion-item>
+          </ion-list>
+        }
+
+        <!-- Login Endpoint -->
+        @if (auth.type === 'login') {
+          <ion-list inset>
+            <ion-item>
+              <ion-input
+                label="URL de login"
+                labelPlacement="stacked"
+                [(ngModel)]="auth.loginUrl"
+                placeholder="https://api.exemplo.com/auth/login"
+                inputmode="url"
+              ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-select
+                label="Método"
+                labelPlacement="stacked"
+                [(ngModel)]="auth.loginMethod"
+                [value]="auth.loginMethod || 'POST'"
+              >
+                <ion-select-option value="POST">POST</ion-select-option>
+                <ion-select-option value="GET">GET</ion-select-option>
+              </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-input
+                label="Campo usuário"
+                labelPlacement="stacked"
+                [(ngModel)]="auth.usernameField"
+                placeholder="email"
+              ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input
+                label="Valor usuário"
+                labelPlacement="stacked"
+                [(ngModel)]="auth.username"
+                placeholder="usuario@exemplo.com"
+              ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input
+                label="Campo senha"
+                labelPlacement="stacked"
+                [(ngModel)]="auth.passwordField"
+                placeholder="password"
+              ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input
+                label="Valor senha"
+                labelPlacement="stacked"
+                type="password"
+                [(ngModel)]="auth.password"
+                placeholder="••••••••"
+              ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input
+                label="Caminho do token na resposta"
+                labelPlacement="stacked"
+                [(ngModel)]="auth.tokenPath"
+                placeholder="data.access_token"
+              ></ion-input>
+            </ion-item>
+          </ion-list>
+
+          <ion-button expand="block" fill="outline" (click)="testLogin()" [disabled]="testingLogin">
+            @if (testingLogin) {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+            } @else {
+              <ion-icon name="play-outline" slot="start"></ion-icon>
+            }
+            Testar Login
+          </ion-button>
+
+          @if (loginTestResponse) {
+            <div class="response-preview">
+              <ion-label color="medium" class="ion-padding-start">
+                <small>Resposta do login:</small>
+              </ion-label>
+              <pre class="response-body">{{ loginTestResponse }}</pre>
+            </div>
+          }
+        }
+
+        <div class="ion-padding-top">
+          <ion-button expand="block" (click)="saveAuth()">
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+            Salvar Autenticação
+          </ion-button>
+        </div>
+      </div>
+    }
+
+  }
+
+  <!-- Modal: Novo Endpoint -->
+  <ion-modal [isOpen]="showEndpointModal" (didDismiss)="closeEndpointModal()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="closeEndpointModal()">Cancelar</ion-button>
+          </ion-buttons>
+          <ion-title>Novo Endpoint</ion-title>
+          <ion-buttons slot="end">
+            <ion-button strong (click)="addEndpoint()" [disabled]="!newEndpoint.name || !newEndpoint.path">
+              Adicionar
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list inset>
+          <ion-item>
+            <ion-input
+              label="Nome *"
+              labelPlacement="stacked"
+              [(ngModel)]="newEndpoint.name"
+              placeholder="Buscar usuários"
+            ></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-select
+              label="Método"
+              labelPlacement="stacked"
+              [(ngModel)]="newEndpoint.method"
+            >
+              @for (m of methods; track m) {
+                <ion-select-option [value]="m">{{ m }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-input
+              label="Path *"
+              labelPlacement="stacked"
+              [(ngModel)]="newEndpoint.path"
+              placeholder="/users"
+            ></ion-input>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
