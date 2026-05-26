@@ -166,6 +166,71 @@
   word-break: break-all;
 }
 
+.history-section {
+  border-top: 2px solid var(--ion-color-light-shade);
+  margin-top: 8px;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+
+  ion-text { flex: 1; font-size: 14px; }
+  .history-count { color: var(--ion-color-medium); font-weight: normal; }
+}
+
+.history-list {
+  padding: 0 16px 16px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: var(--ion-color-light);
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: var(--ion-color-light-shade); }
+  &.selected { background: var(--ion-color-primary-tint); outline: 2px solid var(--ion-color-primary); }
+}
+
+.history-status {
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: center;
+}
+
+.history-method {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: monospace;
+  &.method-get    { color: var(--ion-color-success); }
+  &.method-post   { color: var(--ion-color-primary); }
+  &.method-put    { color: var(--ion-color-warning); }
+  &.method-patch  { color: var(--ion-color-tertiary); }
+  &.method-delete { color: var(--ion-color-danger); }
+}
+
+.history-time {
+  flex: 1;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.history-duration {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  font-family: monospace;
+}
+
 .response-body {
   font-family: monospace;
   font-size: 12px;

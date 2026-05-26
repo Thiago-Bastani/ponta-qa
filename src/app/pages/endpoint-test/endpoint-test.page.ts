@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
-import { Project, Endpoint, KeyValuePair } from '../../models/project.model';
+import { Project, Endpoint, KeyValuePair, HistoryEntry } from '../../models/project.model';
 import { StorageService } from '../../services/storage.service';
 import { ApiService, ApiResponse } from '../../services/api.service';
 
@@ -18,6 +18,9 @@ export class EndpointTestPage {
   activeTab = 'params';
   bodyTab = 'json';
   variables: { [key: string]: string } = {};
+  history: HistoryEntry[] = [];
+  showHistory = true;
+  selectedHistoryId: string | null = null;
 
   response: ApiResponse | null = null;
   loading = false;
@@ -50,6 +53,8 @@ export class EndpointTestPage {
     if (!this.endpoint.bodyParams) this.endpoint.bodyParams = [];
     if (!this.endpoint.bodyJson) this.endpoint.bodyJson = '{}';
     this.variables = { ...(this.endpoint.variables || {}) };
+    this.history = [...(this.endpoint.history || [])];
+    this.selectedHistoryId = null;
     this.response = null;
     this.showResponseHeaders = false;
     if (this.endpoint.bodyType === 'none' && this.hasBody()) {
@@ -127,6 +132,7 @@ export class EndpointTestPage {
     try {
       this.response = await this.apiService.execute(this.project, this.resolveEndpoint());
       this.showResponseHeaders = true;
+      this.addToHistory(this.response);
     } catch (e: any) {
       const toast = await this.toastCtrl.create({
         message: 'Erro de rede: ' + (e.message || 'Verifique a URL e CORS'),
@@ -143,17 +149,71 @@ export class EndpointTestPage {
   save() {
     const idx = this.project.endpoints.findIndex(e => e.id === this.endpoint.id);
     if (idx >= 0) {
-      this.project.endpoints[idx] = { ...this.endpoint, variables: { ...this.variables } };
+      this.project.endpoints[idx] = { ...this.endpoint, variables: { ...this.variables }, history: [...this.history] };
       this.storage.updateProject(this.project);
       this.toast('Endpoint salvo!');
     }
   }
 
-  get statusColor(): string {
-    if (!this.response) return 'medium';
-    if (this.response.status >= 200 && this.response.status < 300) return 'success';
-    if (this.response.status >= 300 && this.response.status < 400) return 'warning';
+  private addToHistory(res: ApiResponse) {
+    const entry: HistoryEntry = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      method: this.endpoint.method,
+      url: this.fullUrl,
+      status: res.status,
+      statusText: res.statusText,
+      duration: res.duration,
+      responseBody: res.body.length > 10000 ? res.body.slice(0, 10000) + '\n… (truncado)' : res.body,
+      responseHeaders: res.headers,
+    };
+    this.history = [entry, ...this.history].slice(0, 20);
+    // Persiste imediatamente
+    const idx = this.project.endpoints.findIndex(e => e.id === this.endpoint.id);
+    if (idx >= 0) {
+      this.project.endpoints[idx] = { ...this.project.endpoints[idx], history: [...this.history] };
+      this.storage.updateProject(this.project);
+    }
+  }
+
+  loadHistoryEntry(entry: HistoryEntry) {
+    this.selectedHistoryId = entry.id;
+    this.response = {
+      status: entry.status,
+      statusText: entry.statusText,
+      duration: entry.duration,
+      body: entry.responseBody,
+      headers: entry.responseHeaders,
+    };
+    this.showResponseHeaders = true;
+  }
+
+  clearHistory() {
+    this.history = [];
+    this.selectedHistoryId = null;
+    const idx = this.project.endpoints.findIndex(e => e.id === this.endpoint.id);
+    if (idx >= 0) {
+      this.project.endpoints[idx] = { ...this.project.endpoints[idx], history: [] };
+      this.storage.updateProject(this.project);
+    }
+  }
+
+  relativeTime(timestamp: number): string {
+    const diff = Math.floor((Date.now() - timestamp) / 1000);
+    if (diff < 60) return 'agora';
+    if (diff < 3600) return `${Math.floor(diff / 60)} min atrás`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} h atrás`;
+    return new Date(timestamp).toLocaleDateString('pt-BR');
+  }
+
+  statusColor(status: number): string {
+    if (status >= 200 && status < 300) return 'success';
+    if (status >= 300 && status < 400) return 'warning';
     return 'danger';
+  }
+
+  get currentStatusColor(): string {
+    return this.response ? this.statusColor(this.response.status) : 'medium';
   }
 
   get formattedBody(): string {

@@ -20,6 +20,18 @@ export interface AuthConfig {
   tokenPath?: string;
 }
 
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  method: string;
+  url: string;
+  status: number;
+  statusText: string;
+  duration: number;
+  responseBody: string;
+  responseHeaders: { [key: string]: string };
+}
+
 export interface Endpoint {
   id: string;
   name: string;
@@ -32,6 +44,7 @@ export interface Endpoint {
   bodyFormData?: KeyValuePair[];
   bodyParams?: KeyValuePair[];
   variables?: { [key: string]: string };
+  history?: HistoryEntry[];
 }
 
 export interface Project {

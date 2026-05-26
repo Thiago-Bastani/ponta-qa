@@ -218,7 +218,7 @@
     @if (response) {
       <div class="response-section ion-padding">
         <div class="response-status-row">
-          <ion-badge [color]="statusColor" class="status-badge">
+          <ion-badge [color]="currentStatusColor" class="status-badge">
             {{ response.status }} {{ response.statusText }}
           </ion-badge>
           <ion-text color="medium">
@@ -249,6 +249,34 @@
         <!-- Response Body -->
         <ion-text color="medium"><small>Body</small></ion-text>
         <pre class="response-body">{{ formattedBody }}</pre>
+      </div>
+    }
+
+    <!-- Histórico -->
+    @if (history.length > 0) {
+      <div class="history-section">
+        <div class="history-header" (click)="showHistory = !showHistory">
+          <ion-icon [name]="showHistory ? 'chevron-down-outline' : 'chevron-forward-outline'" color="medium"></ion-icon>
+          <ion-text><strong>Histórico</strong> <span class="history-count">({{ history.length }})</span></ion-text>
+          <ion-button fill="clear" size="small" color="medium" (click)="clearHistory(); $event.stopPropagation()">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+
+        @if (showHistory) {
+          <div class="history-list">
+            @for (entry of history; track entry.id) {
+              <div class="history-item" [class.selected]="selectedHistoryId === entry.id" (click)="loadHistoryEntry(entry)">
+                <ion-badge [color]="statusColor(entry.status)" class="history-status">
+                  {{ entry.status }}
+                </ion-badge>
+                <span class="history-method" [class]="'method-' + entry.method.toLowerCase()">{{ entry.method }}</span>
+                <span class="history-time">{{ relativeTime(entry.timestamp) }}</span>
+                <span class="history-duration">{{ entry.duration }} ms</span>
+              </div>
+            }
+          </div>
+        }
       </div>
     }
 
