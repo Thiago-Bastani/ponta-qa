@@ -53,6 +53,16 @@ export class ProjectsPage {
     this.router.navigate(['/projects', project.id]);
   }
 
+  duplicateProject(project: Project, event: Event) {
+    event.stopPropagation();
+    const copy: Project = JSON.parse(JSON.stringify(project));
+    copy.id = Date.now().toString();
+    copy.name = project.name + ' (cópia)';
+    copy.endpoints = copy.endpoints.map(ep => ({ ...ep, id: Date.now().toString() + Math.random() }));
+    this.storage.updateProject(copy);
+    this.projects = this.storage.getProjects();
+  }
+
   async confirmDelete(project: Project, event: Event) {
     event.stopPropagation();
     const alert = await this.alertCtrl.create({
