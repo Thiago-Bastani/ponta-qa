@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { Project } from '../../models/project.model';
@@ -22,11 +22,17 @@ export class ProjectsPage {
   constructor(
     private storage: StorageService,
     private router: Router,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ionViewWillEnter() {
+    this.reload();
+  }
+
+  private reload() {
     this.projects = this.storage.getProjects();
+    this.cdr.detectChanges();
   }
 
   openModal() {
@@ -49,8 +55,8 @@ export class ProjectsPage {
       endpoints: [],
     };
     this.storage.updateProject(project);
-    this.projects = this.storage.getProjects();
     this.showModal = false;
+    this.reload();
   }
 
   openProject(project: Project) {
@@ -76,9 +82,9 @@ export class ProjectsPage {
       project.baseUrl = this.editProject.baseUrl.trim();
       project.description = this.editProject.description.trim();
       this.storage.updateProject(project);
-      this.projects = this.storage.getProjects();
     }
     this.showEditModal = false;
+    this.reload();
   }
 
   async duplicateProject(project: Project, event: Event) {
@@ -96,7 +102,7 @@ export class ProjectsPage {
             copy.name = project.name + ' (cópia)';
             copy.endpoints = copy.endpoints.map(ep => ({ ...ep, id: Date.now().toString() + Math.random() }));
             this.storage.updateProject(copy);
-            this.projects = this.storage.getProjects();
+            this.reload();
           },
         },
       ],
@@ -116,7 +122,7 @@ export class ProjectsPage {
           role: 'destructive',
           handler: () => {
             this.storage.deleteProject(project.id);
-            this.projects = this.storage.getProjects();
+            this.reload();
           },
         },
       ],

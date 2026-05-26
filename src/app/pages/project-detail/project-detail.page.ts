@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Project, Endpoint, AuthConfig } from '../../models/project.model';
@@ -34,7 +34,8 @@ export class ProjectDetailPage {
     private storage: StorageService,
     private apiService: ApiService,
     private alertCtrl: AlertController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ionViewWillEnter() {
@@ -48,6 +49,15 @@ export class ProjectDetailPage {
     this.project = project;
     this.auth = { ...project.auth };
     this.loginTestResponse = '';
+  }
+
+  private reloadProject() {
+    const id = this.route.snapshot.paramMap.get('projectId')!;
+    const project = this.storage.getProject(id);
+    if (project) {
+      this.project = project;
+      this.cdr.detectChanges();
+    }
   }
 
   goBack() {
@@ -86,6 +96,7 @@ export class ProjectDetailPage {
       ep.method = this.editEndpoint.method as any;
       ep.path = this.editEndpoint.path.trim();
       this.storage.updateProject(this.project);
+      this.reloadProject();
     }
     this.showEditModal = false;
   }
@@ -107,6 +118,7 @@ export class ProjectDetailPage {
     this.project.endpoints.push(endpoint);
     this.storage.updateProject(this.project);
     this.showEndpointModal = false;
+    this.reloadProject();
   }
 
   async confirmDeleteEndpoint(endpoint: Endpoint, event: Event) {
@@ -122,6 +134,7 @@ export class ProjectDetailPage {
           handler: () => {
             this.project.endpoints = this.project.endpoints.filter(e => e.id !== endpoint.id);
             this.storage.updateProject(this.project);
+            this.reloadProject();
           },
         },
       ],
@@ -132,6 +145,7 @@ export class ProjectDetailPage {
   saveAuth() {
     this.project.auth = { ...this.auth };
     this.storage.updateProject(this.project);
+    this.reloadProject();
     this.toast('Autenticação salva!');
   }
 
