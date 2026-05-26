@@ -15,6 +15,10 @@ export class ProjectsPage {
   showModal = false;
   newProject = { name: '', description: '', baseUrl: '' };
 
+  showEditModal = false;
+  editingProjectId = '';
+  editProject = { name: '', description: '', baseUrl: '' };
+
   constructor(
     private storage: StorageService,
     private router: Router,
@@ -53,14 +57,51 @@ export class ProjectsPage {
     this.router.navigate(['/projects', project.id]);
   }
 
-  duplicateProject(project: Project, event: Event) {
+  openEditModal(project: Project, event: Event) {
     event.stopPropagation();
-    const copy: Project = JSON.parse(JSON.stringify(project));
-    copy.id = Date.now().toString();
-    copy.name = project.name + ' (cópia)';
-    copy.endpoints = copy.endpoints.map(ep => ({ ...ep, id: Date.now().toString() + Math.random() }));
-    this.storage.updateProject(copy);
-    this.projects = this.storage.getProjects();
+    this.editingProjectId = project.id;
+    this.editProject = { name: project.name, description: project.description || '', baseUrl: project.baseUrl };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+  }
+
+  saveEdit() {
+    if (!this.editProject.name.trim() || !this.editProject.baseUrl.trim()) return;
+    const project = this.storage.getProject(this.editingProjectId);
+    if (project) {
+      project.name = this.editProject.name.trim();
+      project.baseUrl = this.editProject.baseUrl.trim();
+      project.description = this.editProject.description.trim();
+      this.storage.updateProject(project);
+      this.projects = this.storage.getProjects();
+    }
+    this.showEditModal = false;
+  }
+
+  async duplicateProject(project: Project, event: Event) {
+    event.stopPropagation();
+    const alert = await this.alertCtrl.create({
+      header: 'Duplicar projeto',
+      message: `Duplicar "${project.name}"?`,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Duplicar',
+          handler: () => {
+            const copy: Project = JSON.parse(JSON.stringify(project));
+            copy.id = Date.now().toString();
+            copy.name = project.name + ' (cópia)';
+            copy.endpoints = copy.endpoints.map(ep => ({ ...ep, id: Date.now().toString() + Math.random() }));
+            this.storage.updateProject(copy);
+            this.projects = this.storage.getProjects();
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   async confirmDelete(project: Project, event: Event) {
