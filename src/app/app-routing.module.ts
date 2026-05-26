@@ -15,6 +15,10 @@ const routes: Routes = [
     path: 'endpoint-test/:projectId/:endpointId',
     loadChildren: () => import('./pages/endpoint-test/endpoint-test.module').then(m => m.EndpointTestPageModule),
   },
+  {
+    path: 'history-detail/:projectId/:endpointId/:historyId',
+    loadChildren: () => import('./pages/history-detail/history-detail.module').then(m => m.HistoryDetailPageModule),
+  },
 ];
 
 @NgModule({

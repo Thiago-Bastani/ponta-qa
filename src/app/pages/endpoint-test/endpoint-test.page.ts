@@ -20,7 +20,6 @@ export class EndpointTestPage {
   variables: { [key: string]: string } = {};
   history: HistoryEntry[] = [];
   showHistory = true;
-  selectedHistoryId: string | null = null;
 
   response: ApiResponse | null = null;
   loading = false;
@@ -54,7 +53,6 @@ export class EndpointTestPage {
     if (!this.endpoint.bodyJson) this.endpoint.bodyJson = '{}';
     this.variables = { ...(this.endpoint.variables || {}) };
     this.history = [...(this.endpoint.history || [])];
-    this.selectedHistoryId = null;
     this.response = null;
     this.showResponseHeaders = false;
     if (this.endpoint.bodyType === 'none' && this.hasBody()) {
@@ -176,21 +174,12 @@ export class EndpointTestPage {
     }
   }
 
-  loadHistoryEntry(entry: HistoryEntry) {
-    this.selectedHistoryId = entry.id;
-    this.response = {
-      status: entry.status,
-      statusText: entry.statusText,
-      duration: entry.duration,
-      body: entry.responseBody,
-      headers: entry.responseHeaders,
-    };
-    this.showResponseHeaders = true;
+  openHistoryEntry(entry: HistoryEntry) {
+    this.router.navigate(['/history-detail', this.project.id, this.endpoint.id, entry.id]);
   }
 
   clearHistory() {
     this.history = [];
-    this.selectedHistoryId = null;
     const idx = this.project.endpoints.findIndex(e => e.id === this.endpoint.id);
     if (idx >= 0) {
       this.project.endpoints[idx] = { ...this.project.endpoints[idx], history: [] };

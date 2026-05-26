@@ -1,0 +1,67 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Detalhe do Histórico</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (entry) {
+    <!-- Status + Meta -->
+    <div class="meta-card ion-padding">
+      <div class="status-row">
+        <ion-badge [color]="statusColor" class="status-badge">
+          {{ entry.status }} {{ entry.statusText }}
+        </ion-badge>
+        <ion-badge [color]="methodColor(entry.method)" class="method-badge">
+          {{ entry.method }}
+        </ion-badge>
+        <span class="duration">{{ entry.duration }} ms</span>
+      </div>
+
+      <div class="meta-row">
+        <ion-icon name="time-outline" color="medium"></ion-icon>
+        <ion-text color="medium"><small>{{ formattedDate }}</small></ion-text>
+      </div>
+
+      <div class="meta-row">
+        <ion-icon name="link-outline" color="medium"></ion-icon>
+        <ion-text><small class="url-text">{{ entry.url }}</small></ion-text>
+      </div>
+    </div>
+
+    <!-- Response Headers -->
+    <div class="section-header" (click)="showHeaders = !showHeaders">
+      <ion-icon [name]="showHeaders ? 'chevron-down-outline' : 'chevron-forward-outline'" color="medium"></ion-icon>
+      <ion-text><strong>Headers da resposta</strong></ion-text>
+      <ion-badge color="medium" class="count-badge">{{ headersList.length }}</ion-badge>
+    </div>
+
+    @if (showHeaders) {
+      <div class="headers-block ion-padding-horizontal">
+        @if (headersList.length === 0) {
+          <ion-text color="medium"><small>Nenhum header exposto (CORS)</small></ion-text>
+        }
+        @for (h of headersList; track h.key) {
+          <div class="header-row">
+            <span class="header-key">{{ h.key }}</span>
+            <span class="header-value">{{ h.value }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Response Body -->
+    <div class="section-header">
+      <ion-icon name="code-slash-outline" color="medium"></ion-icon>
+      <ion-text><strong>Body da resposta</strong></ion-text>
+    </div>
+    <div class="ion-padding-horizontal ion-padding-bottom">
+      <pre class="response-body">{{ formattedBody }}</pre>
+    </div>
+  }
+</ion-content>

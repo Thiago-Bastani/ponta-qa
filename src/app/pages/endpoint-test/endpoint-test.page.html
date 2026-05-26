@@ -266,7 +266,7 @@
         @if (showHistory) {
           <div class="history-list">
             @for (entry of history; track entry.id) {
-              <div class="history-item" [class.selected]="selectedHistoryId === entry.id" (click)="loadHistoryEntry(entry)">
+              <div class="history-item" (click)="openHistoryEntry(entry)">
                 <ion-badge [color]="statusColor(entry.status)" class="history-status">
                   {{ entry.status }}
                 </ion-badge>
