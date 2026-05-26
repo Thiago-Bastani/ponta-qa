@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Project, Endpoint, AuthConfig } from '../../models/project.model';
@@ -35,7 +35,8 @@ export class ProjectDetailPage {
     private apiService: ApiService,
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ionViewWillEnter() {
@@ -55,6 +56,8 @@ export class ProjectDetailPage {
     const id = this.route.snapshot.paramMap.get('projectId')!;
     const project = this.storage.getProject(id);
     if (project) {
+      this.project = { ...this.project, endpoints: [] };
+      this.cdr.detectChanges();
       this.project = project;
       this.cdr.detectChanges();
     }
@@ -90,15 +93,27 @@ export class ProjectDetailPage {
 
   saveEditEndpoint() {
     if (!this.editEndpoint.name.trim() || !this.editEndpoint.path.trim()) return;
-    const ep = this.project.endpoints.find(e => e.id === this.editingEndpointId);
-    if (ep) {
-      ep.name = this.editEndpoint.name.trim();
-      ep.method = this.editEndpoint.method as any;
-      ep.path = this.editEndpoint.path.trim();
-      this.storage.updateProject(this.project);
-      this.reloadProject();
-    }
+    const endpoints = this.project.endpoints.map(ep =>
+      ep.id === this.editingEndpointId
+        ? { ...ep, name: this.editEndpoint.name.trim(), method: this.editEndpoint.method as any, path: this.editEndpoint.path.trim() }
+        : ep
+    );
+    this.storage.updateProject({ ...this.project, endpoints });
     this.showEditModal = false;
+  }
+
+  onEditModalDismiss() {
+    this.ngZone.run(() => {
+      this.showEditModal = false;
+      this.reloadProject();
+    });
+  }
+
+  onEndpointModalDismiss() {
+    this.ngZone.run(() => {
+      this.showEndpointModal = false;
+      this.reloadProject();
+    });
   }
 
   addEndpoint() {
@@ -115,10 +130,9 @@ export class ProjectDetailPage {
       bodyFormData: [],
       bodyParams: [],
     };
-    this.project.endpoints.push(endpoint);
-    this.storage.updateProject(this.project);
+    const updated = { ...this.project, endpoints: [...this.project.endpoints, endpoint] };
+    this.storage.updateProject(updated);
     this.showEndpointModal = false;
-    this.reloadProject();
   }
 
   async confirmDeleteEndpoint(endpoint: Endpoint, event: Event) {
@@ -160,6 +174,9 @@ export class ProjectDetailPage {
       this.testingLogin = false;
     }
   }
+
+  setEditMethod(m: string) { this.editEndpoint.method = m; }
+  setNewMethod(m: string)  { this.newEndpoint.method = m; }
 
   methodColor(method: string): string {
     const map: Record<string, string> = { GET: 'success', POST: 'primary', PUT: 'warning', PATCH: 'tertiary', DELETE: 'danger' };

@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title>
       @if (endpoint) {
-        <ion-badge [color]="methodColor(endpoint.method)" class="method-badge-sm">{{ endpoint.method }}</ion-badge>
+        <span [ngClass]="['method-badge-sm', 'badge-' + endpoint.method.toLowerCase()]">{{ endpoint.method }}</span>
         {{ endpoint.name }}
       }
     </ion-title>
@@ -23,18 +23,29 @@
     <!-- URL Bar Editável -->
     <div class="url-bar ion-padding-horizontal ion-padding-top">
       <div class="url-inputs">
-        <ion-select
-          [(ngModel)]="endpoint.method"
-          interface="popover"
-          class="method-select"
-          [style.--ion-color-base]="'var(--ion-color-' + methodColor(endpoint.method) + ')'"
-        >
-          <ion-select-option value="GET">GET</ion-select-option>
-          <ion-select-option value="POST">POST</ion-select-option>
-          <ion-select-option value="PUT">PUT</ion-select-option>
-          <ion-select-option value="PATCH">PATCH</ion-select-option>
-          <ion-select-option value="DELETE">DELETE</ion-select-option>
-        </ion-select>
+        <div class="method-dropdown">
+          <ion-button
+            fill="clear"
+            class="method-btn"
+            id="method-trigger"
+            [style.--ion-color-base]="'var(--ion-color-' + methodColor(endpoint.method) + ')'"
+            [style.color]="'var(--ion-color-' + methodColor(endpoint.method) + ')'"
+          >
+            <span>{{ endpoint.method }}</span>
+            <ion-icon name="chevron-down-outline" slot="end" style="font-size:12px"></ion-icon>
+          </ion-button>
+          <ion-popover trigger="method-trigger" triggerAction="click" [dismissOnSelect]="true">
+            <ng-template>
+              <ion-list lines="none">
+                @for (m of ['GET','POST','PUT','PATCH','DELETE']; track m) {
+                  <ion-item button (click)="setMethod(m)" [detail]="false">
+                    <ion-label [style.color]="'var(--ion-color-' + methodColor(m) + ')'" style="font-weight:700;font-size:13px">{{ m }}</ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            </ng-template>
+          </ion-popover>
+        </div>
         <ion-input
           [(ngModel)]="endpoint.path"
           placeholder="/caminho ou /users/{id}"

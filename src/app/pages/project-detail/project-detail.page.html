@@ -32,13 +32,13 @@
       }
 
       <ion-list>
-        @for (ep of project.endpoints; track ep.id) {
+        @for (ep of project.endpoints; track $index) {
           <ion-item button (click)="openEndpoint(ep)">
-            <ion-badge slot="start" [color]="methodColor(ep.method)" class="method-badge">
-              {{ ep.method }}
-            </ion-badge>
             <ion-label>
-              <h2>{{ ep.name }}</h2>
+              <h2>
+                <span [ngClass]="['method-badge', 'badge-' + ep.method.toLowerCase()]">{{ ep.method }}</span>
+                {{ ep.name }}
+              </h2>
               <p class="path">{{ ep.path }}</p>
             </ion-label>
             <ion-buttons slot="end">
@@ -194,7 +194,7 @@
   }
 
   <!-- Modal: Editar Endpoint -->
-  <ion-modal [isOpen]="showEditModal" (didDismiss)="closeEditModal()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6]">
+  <ion-modal [isOpen]="showEditModal" (didDismiss)="onEditModalDismiss()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6]">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -219,16 +219,19 @@
               placeholder="Buscar usuários"
             ></ion-input>
           </ion-item>
-          <ion-item>
-            <ion-select
-              label="Método"
-              labelPlacement="stacked"
-              [(ngModel)]="editEndpoint.method"
-            >
-              @for (m of methods; track m) {
-                <ion-select-option [value]="m">{{ m }}</ion-select-option>
-              }
-            </ion-select>
+          <ion-item lines="none">
+            <div style="width:100%;padding:8px 0">
+              <ion-label color="medium" style="font-size:12px;display:block;margin-bottom:8px">Método</ion-label>
+              <div class="method-chips">
+                @for (m of methods; track m) {
+                  <button type="button" class="method-btn-pill"
+                    [class.active]="editEndpoint.method === m"
+                    [attr.data-method]="m.toLowerCase()"
+                    (click)="setEditMethod(m)"
+                  >{{ m }}</button>
+                }
+              </div>
+            </div>
           </ion-item>
           <ion-item>
             <ion-input
@@ -245,7 +248,7 @@
   </ion-modal>
 
   <!-- Modal: Novo Endpoint -->
-  <ion-modal [isOpen]="showEndpointModal" (didDismiss)="closeEndpointModal()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6]">
+  <ion-modal [isOpen]="showEndpointModal" (didDismiss)="onEndpointModalDismiss()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6]">
     <ng-template>
       <ion-header>
         <ion-toolbar>
@@ -270,16 +273,19 @@
               placeholder="Buscar usuários"
             ></ion-input>
           </ion-item>
-          <ion-item>
-            <ion-select
-              label="Método"
-              labelPlacement="stacked"
-              [(ngModel)]="newEndpoint.method"
-            >
-              @for (m of methods; track m) {
-                <ion-select-option [value]="m">{{ m }}</ion-select-option>
-              }
-            </ion-select>
+          <ion-item lines="none">
+            <div style="width:100%;padding:8px 0">
+              <ion-label color="medium" style="font-size:12px;display:block;margin-bottom:8px">Método</ion-label>
+              <div class="method-chips">
+                @for (m of methods; track m) {
+                  <button type="button" class="method-btn-pill"
+                    [class.active]="newEndpoint.method === m"
+                    [attr.data-method]="m.toLowerCase()"
+                    (click)="setNewMethod(m)"
+                  >{{ m }}</button>
+                }
+              </div>
+            </div>
           </ion-item>
           <ion-item>
             <ion-input

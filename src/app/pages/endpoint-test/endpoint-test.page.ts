@@ -102,6 +102,8 @@ export class EndpointTestPage {
     return ep;
   }
 
+  setMethod(m: string) { this.endpoint.method = m as any; }
+
   addPair(list: KeyValuePair[]) {
     list.push({ key: '', value: '', enabled: true });
   }

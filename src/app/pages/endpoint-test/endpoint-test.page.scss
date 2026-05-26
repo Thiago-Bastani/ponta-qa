@@ -10,13 +10,16 @@
   margin-bottom: 6px;
 }
 
-.method-select {
+.method-dropdown {
   flex-shrink: 0;
+}
+
+.method-btn {
   font-weight: 700;
   font-size: 13px;
-  color: var(--ion-color-base);
-  --padding-start: 8px;
+  --padding-start: 4px;
   --padding-end: 4px;
+  margin: 0;
 }
 
 .path-input {
@@ -44,6 +47,15 @@
   font-weight: 700;
   vertical-align: middle;
   margin-inline-end: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #fff;
+
+  &.badge-get    { background: var(--ion-color-success); }
+  &.badge-post   { background: var(--ion-color-primary); }
+  &.badge-put    { background: var(--ion-color-warning); color: #000; }
+  &.badge-patch  { background: var(--ion-color-tertiary); }
+  &.badge-delete { background: var(--ion-color-danger); }
 }
 
 .kv-container {
