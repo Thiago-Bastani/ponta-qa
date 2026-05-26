@@ -21,6 +21,11 @@ export class ProjectDetailPage {
 
   showEndpointModal = false;
   newEndpoint = { name: '', method: 'GET', path: '' };
+
+  showEditModal = false;
+  editingEndpointId = '';
+  editEndpoint = { name: '', method: 'GET', path: '' };
+
   readonly methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
   constructor(
@@ -60,6 +65,29 @@ export class ProjectDetailPage {
 
   closeEndpointModal() {
     this.showEndpointModal = false;
+  }
+
+  openEditEndpointModal(endpoint: Endpoint, event: Event) {
+    event.stopPropagation();
+    this.editingEndpointId = endpoint.id;
+    this.editEndpoint = { name: endpoint.name, method: endpoint.method, path: endpoint.path };
+    this.showEditModal = true;
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+  }
+
+  saveEditEndpoint() {
+    if (!this.editEndpoint.name.trim() || !this.editEndpoint.path.trim()) return;
+    const ep = this.project.endpoints.find(e => e.id === this.editingEndpointId);
+    if (ep) {
+      ep.name = this.editEndpoint.name.trim();
+      ep.method = this.editEndpoint.method as any;
+      ep.path = this.editEndpoint.path.trim();
+      this.storage.updateProject(this.project);
+    }
+    this.showEditModal = false;
   }
 
   addEndpoint() {

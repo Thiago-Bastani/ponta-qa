@@ -33,22 +33,23 @@
 
       <ion-list>
         @for (ep of project.endpoints; track ep.id) {
-          <ion-item-sliding>
-            <ion-item button detail (click)="openEndpoint(ep)">
-              <ion-badge slot="start" [color]="methodColor(ep.method)" class="method-badge">
-                {{ ep.method }}
-              </ion-badge>
-              <ion-label>
-                <h2>{{ ep.name }}</h2>
-                <p class="path">{{ ep.path }}</p>
-              </ion-label>
-            </ion-item>
-            <ion-item-options side="end">
-              <ion-item-option color="danger" (click)="confirmDeleteEndpoint(ep, $event)">
+          <ion-item button (click)="openEndpoint(ep)">
+            <ion-badge slot="start" [color]="methodColor(ep.method)" class="method-badge">
+              {{ ep.method }}
+            </ion-badge>
+            <ion-label>
+              <h2>{{ ep.name }}</h2>
+              <p class="path">{{ ep.path }}</p>
+            </ion-label>
+            <ion-buttons slot="end">
+              <ion-button fill="clear" (click)="openEditEndpointModal(ep, $event)">
+                <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" color="danger" (click)="confirmDeleteEndpoint(ep, $event)">
                 <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-              </ion-item-option>
-            </ion-item-options>
-          </ion-item-sliding>
+              </ion-button>
+            </ion-buttons>
+          </ion-item>
         }
       </ion-list>
 
@@ -191,6 +192,56 @@
     }
 
   }
+
+  <!-- Modal: Editar Endpoint -->
+  <ion-modal [isOpen]="showEditModal" (didDismiss)="closeEditModal()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="closeEditModal()">Cancelar</ion-button>
+          </ion-buttons>
+          <ion-title>Editar Endpoint</ion-title>
+          <ion-buttons slot="end">
+            <ion-button strong (click)="saveEditEndpoint()" [disabled]="!editEndpoint.name || !editEndpoint.path">
+              Salvar
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-list inset>
+          <ion-item>
+            <ion-input
+              label="Nome *"
+              labelPlacement="stacked"
+              [(ngModel)]="editEndpoint.name"
+              placeholder="Buscar usuários"
+            ></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-select
+              label="Método"
+              labelPlacement="stacked"
+              [(ngModel)]="editEndpoint.method"
+            >
+              @for (m of methods; track m) {
+                <ion-select-option [value]="m">{{ m }}</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-input
+              label="Path *"
+              labelPlacement="stacked"
+              [(ngModel)]="editEndpoint.path"
+              placeholder="/users"
+            ></ion-input>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 
   <!-- Modal: Novo Endpoint -->
   <ion-modal [isOpen]="showEndpointModal" (didDismiss)="closeEndpointModal()" [initialBreakpoint]="0.6" [breakpoints]="[0, 0.6]">

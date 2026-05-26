@@ -20,10 +20,31 @@
 <ion-content>
   @if (endpoint && project) {
 
-    <!-- URL Display -->
-    <div class="url-bar ion-padding-horizontal">
-      <ion-text color="medium"><small>URL</small></ion-text>
-      <p class="url-display">{{ fullUrl }}</p>
+    <!-- URL Bar Editável -->
+    <div class="url-bar ion-padding-horizontal ion-padding-top">
+      <div class="url-inputs">
+        <ion-select
+          [(ngModel)]="endpoint.method"
+          interface="popover"
+          class="method-select"
+          [style.--ion-color-base]="'var(--ion-color-' + methodColor(endpoint.method) + ')'"
+        >
+          <ion-select-option value="GET">GET</ion-select-option>
+          <ion-select-option value="POST">POST</ion-select-option>
+          <ion-select-option value="PUT">PUT</ion-select-option>
+          <ion-select-option value="PATCH">PATCH</ion-select-option>
+          <ion-select-option value="DELETE">DELETE</ion-select-option>
+        </ion-select>
+        <ion-input
+          [(ngModel)]="endpoint.path"
+          placeholder="/caminho"
+          class="path-input"
+          fill="outline"
+        ></ion-input>
+      </div>
+      <ion-text color="medium">
+        <small class="full-url-preview">{{ fullUrl }}</small>
+      </ion-text>
     </div>
 
     <!-- Request Tabs -->
@@ -141,16 +162,12 @@
       }
     }
 
-    <!-- Divider -->
+    <!-- Enviar -->
     <div class="ion-padding-horizontal">
       <ion-button expand="block" (click)="send()" [disabled]="loading" class="send-btn">
-        @if (loading) {
-          <ion-spinner name="crescent" slot="start"></ion-spinner>
-          Enviando...
-        } @else {
-          <ion-icon name="send-outline" slot="start"></ion-icon>
-          Enviar
-        }
+        <ion-spinner name="crescent" slot="start" [hidden]="!loading"></ion-spinner>
+        <ion-icon name="send-outline" slot="start" [hidden]="loading"></ion-icon>
+        {{ loading ? 'Enviando...' : 'Enviar' }}
       </ion-button>
     </div>
 
@@ -166,22 +183,25 @@
           </ion-text>
         </div>
 
-        <!-- Response Headers Toggle -->
+        <!-- Response Headers -->
         <ion-item button (click)="showResponseHeaders = !showResponseHeaders" lines="none" class="headers-toggle">
           <ion-icon [name]="showResponseHeaders ? 'chevron-down-outline' : 'chevron-forward-outline'" slot="start"></ion-icon>
           <ion-label>Headers da resposta ({{ responseHeadersList.length }})</ion-label>
         </ion-item>
 
-        @if (showResponseHeaders) {
-          <div class="response-headers">
-            @for (h of responseHeadersList; track h.key) {
-              <div class="header-row">
-                <span class="header-key">{{ h.key }}</span>
-                <span class="header-value">{{ h.value }}</span>
-              </div>
-            }
-          </div>
-        }
+        <div [hidden]="!showResponseHeaders" class="response-headers">
+          @if (responseHeadersList.length === 0) {
+            <ion-text color="medium">
+              <small class="ion-padding">Nenhum header exposto (verifique CORS / Access-Control-Expose-Headers no servidor)</small>
+            </ion-text>
+          }
+          @for (h of responseHeadersList; track h.key) {
+            <div class="header-row">
+              <span class="header-key">{{ h.key }}</span>
+              <span class="header-value">{{ h.value }}</span>
+            </div>
+          }
+        </div>
 
         <!-- Response Body -->
         <ion-text color="medium"><small>Body</small></ion-text>

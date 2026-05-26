@@ -49,6 +49,11 @@ export class EndpointTestPage {
     if (!this.endpoint.bodyParams) this.endpoint.bodyParams = [];
     if (!this.endpoint.bodyJson) this.endpoint.bodyJson = '{}';
     this.response = null;
+    this.showResponseHeaders = false;
+    // Sync bodyTab: se bodyType é 'none' e método aceita body, exibe JSON por padrão
+    if (this.endpoint.bodyType === 'none' && this.hasBody()) {
+      this.endpoint.bodyType = 'json';
+    }
     this.bodyTab = this.endpoint.bodyType === 'none' ? 'json' : this.endpoint.bodyType;
   }
 
@@ -76,10 +81,17 @@ export class EndpointTestPage {
   }
 
   async send() {
+    if (this.loading) return;
     this.loading = true;
     this.response = null;
+    this.showResponseHeaders = false;
+    // Garante que bodyType está sincronizado com a aba exibida
+    if (this.hasBody()) {
+      this.endpoint.bodyType = this.bodyTab as any;
+    }
     try {
       this.response = await this.apiService.execute(this.project, this.endpoint);
+      this.showResponseHeaders = true;
     } catch (e: any) {
       const toast = await this.toastCtrl.create({
         message: 'Erro de rede: ' + (e.message || 'Verifique a URL e CORS'),

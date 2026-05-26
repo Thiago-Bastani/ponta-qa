@@ -1,21 +1,36 @@
 .url-bar {
-  padding-top: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--ion-color-light-shade);
-
-  small {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
 }
 
-.url-display {
+.url-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.method-select {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ion-color-base);
+  --padding-start: 8px;
+  --padding-end: 4px;
+}
+
+.path-input {
+  flex: 1;
   font-family: monospace;
   font-size: 13px;
+  --min-height: 36px;
+}
+
+.full-url-preview {
+  font-family: monospace;
+  font-size: 11px;
   word-break: break-all;
-  margin: 4px 0 0 0;
-  color: var(--ion-color-dark);
+  color: var(--ion-color-medium);
 }
 
 .method-badge-sm {
