@@ -22,37 +22,36 @@
     </div>
   }
 
-  <ion-list>
+  <div class="project-list">
     @for (project of projects; track project.id) {
-      <ion-item button (click)="openProject(project)">
-        <ion-icon name="cube-outline" slot="start" color="primary"></ion-icon>
-        <ion-label>
-          <h2>{{ project.name }}</h2>
-          <p>{{ project.baseUrl }}</p>
-          @if (project.description) {
-            <p class="desc">{{ project.description }}</p>
-          }
-        </ion-label>
-        <ion-badge slot="end" color="medium" style="margin-inline-end: 8px">
-          {{ project.endpoints.length }}
-        </ion-badge>
-        <ion-buttons slot="end">
-          <ion-button fill="clear" (click)="openEditModal(project, $event)">
-            <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
-          </ion-button>
-          <ion-button fill="clear" (click)="duplicateProject(project, $event)">
-            <ion-icon name="copy-outline" slot="icon-only"></ion-icon>
-          </ion-button>
-          <ion-button fill="clear" (click)="exportProject(project, $event)">
-            <ion-icon name="cloud-download-outline" slot="icon-only"></ion-icon>
-          </ion-button>
-          <ion-button fill="clear" color="danger" (click)="confirmDelete(project, $event)">
-            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-item>
+      <div class="project-card" (click)="openProject(project)">
+        <div class="project-card-main">
+          <div class="project-info">
+            <div class="project-name">{{ project.name }}</div>
+            <div class="project-url">{{ project.baseUrl }}</div>
+            @if (project.description) {
+              <div class="project-desc">{{ project.description }}</div>
+            }
+          </div>
+          <span class="endpoint-count">{{ project.endpoints.length }} endpoint{{ project.endpoints.length !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="project-actions" (click)="$event.stopPropagation()">
+          <button class="action-btn" (click)="openEditModal(project, $event)">
+            <ion-icon name="pencil-outline"></ion-icon>
+          </button>
+          <button class="action-btn" (click)="duplicateProject(project, $event)">
+            <ion-icon name="copy-outline"></ion-icon>
+          </button>
+          <button class="action-btn" (click)="exportProject(project, $event)">
+            <ion-icon name="cloud-download-outline"></ion-icon>
+          </button>
+          <button class="action-btn action-btn--danger" (click)="confirmDelete(project, $event)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
     }
-  </ion-list>
+  </div>
 
   <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)">
 
